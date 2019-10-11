@@ -18,18 +18,6 @@ namespace BattleShip
             computerBoard = Board.RandomBoard();
         }
 
-        public void PlayHuntGame()
-        {
-            while (!Done())
-            {
-                PrintBoards();
-
-                PlayerInput();
-
-                RandomHit();
-            }
-        }
-
         public void PlayRandomGame()
         {
             while (!Done())
@@ -55,7 +43,10 @@ namespace BattleShip
             while (!humanBoard.AvaliableHit(testCor))
                 testCor = new Coordinate(random.Next(Board.Size), random.Next(Board.Size));
             bool hit = humanBoard.Hit(testCor);
+            ShipType sunkShip = humanBoard.SunkShip();
             Console.WriteLine($"Computer targets {testCor}, {(hit ? "and hits" : "but misses")}");
+            if (sunkShip != ShipType.Empty)
+                Console.WriteLine($"sunk the {sunkShip}");
         }
 
         private void PlayerInput()
@@ -65,14 +56,17 @@ namespace BattleShip
             Console.Clear();
             string[] tokens = line.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
             bool hit = computerBoard.Hit(int.Parse(tokens[0]), int.Parse(tokens[1]));
+            ShipType sunkShip = computerBoard.SunkShip();
             Console.WriteLine($"targeted ({tokens[0]},{tokens[1]}), {(hit ? "and hit" : "but missed")}");
+            if(sunkShip != ShipType.Empty)
+                Console.WriteLine($"sunk the {sunkShip}");
         }
 
         private void PrintBoards()
         {
             Console.WriteLine("───────────── Your Board ───────────────       ─────────── Guessing Board ─────────────");
             string[] human = humanBoard.ToString().Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
-            string[] computer = computerBoard.ToString().Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
+            string[] computer = computerBoard.PrintHits().Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
 
             for (int i = 0; i < human.Length; i++)
                 Console.WriteLine(human[i] + "  | |  " + computer[i]);

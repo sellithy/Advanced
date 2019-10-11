@@ -10,6 +10,7 @@ namespace BattleShip
     {
         private readonly static Random random = new Random();
         public const int Size = 10;
+        Ship Lasthit;
         readonly List<Ship> Fleet;
         readonly char[,] ships;
         readonly bool[,] hits;
@@ -47,20 +48,37 @@ namespace BattleShip
 
             hits[x, y] = true;
 
-            return ships[x,y] != '\0';
+            bool hit = ships[x, y] != '\0';
+
+            if (hit)
+            {
+                foreach (Ship s in Fleet)
+                    if (s.GetCoordinates().Contains(new Coordinate(x, y)))
+                    {
+                        Lasthit = s;
+                        break;
+                    }
+            }
+            else
+                Lasthit = new Ship(false, 0, 0, ShipType.Empty);
+            
+            return hit;
         }
 
-        public bool SunkAShip(Ship s)
+        public ShipType SunkShip()
         {
-            foreach (Coordinate c in s.GetCoordinates())
-                if (!hits[c.X, c.Y])
-                    return false;
+            if (Lasthit.Type != ShipType.Empty)
+                foreach (Coordinate c in Lasthit.GetCoordinates())
+                {
+                    if (!hits[c.X, c.Y])
+                        return ShipType.Empty;
+                }
 
-            return true;
+            return Lasthit.Type;
         }
 
         public bool AvaliableHit(Coordinate cor)
-        { 
+        {
             return !hits[cor.X, cor.Y];
         }
 
