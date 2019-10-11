@@ -7,7 +7,7 @@ namespace BattleShip
         static void Main(string[] args)
         {
             Driver driver = new Driver();
-            driver.PlayRandomGame();
+            driver.PlayHuntGame();
             Console.Read();
         }
     }

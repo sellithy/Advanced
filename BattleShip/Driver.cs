@@ -8,14 +8,29 @@ namespace BattleShip
 {
     class Driver
     {
-        Random random = new Random();
         Board humanBoard, computerBoard;
+        Logic humanLogic;
 
         public Driver()
         {
             Console.SetWindowSize(90, 26);
             humanBoard = Board.RandomBoard();
             computerBoard = Board.RandomBoard();
+            humanLogic = new Logic(humanBoard);
+        }
+
+        public void PlayHuntGame()
+        {
+            while (!Done())
+            {
+                PrintBoards();
+
+                PlayerInput();
+
+                if (!Done())
+                    HuntHit();
+            }
+            Console.WriteLine("WON");
         }
 
         public void PlayRandomGame()
@@ -32,16 +47,20 @@ namespace BattleShip
             Console.WriteLine("WON");
         }
 
-        private bool Done()
+        private void HuntHit()
         {
-            return computerBoard.Done() || humanBoard.Done();
+            Coordinate testCor = humanLogic.HuntHit();
+            bool hit = humanBoard.Hit(testCor);
+            humanLogic.Report(hit);
+            ShipType sunkShip = humanBoard.SunkShip();
+            Console.WriteLine($"Computer targets {testCor}, {(hit ? "and hits" : "but misses")}");
+            if (sunkShip != ShipType.Empty)
+                Console.WriteLine($"sunk the {sunkShip}");
         }
 
         private void RandomHit()
         {
-            Coordinate testCor = new Coordinate(random.Next(Board.Size), random.Next(Board.Size));
-            while (!humanBoard.AvaliableHit(testCor))
-                testCor = new Coordinate(random.Next(Board.Size), random.Next(Board.Size));
+            Coordinate testCor = humanLogic.RandomHit();
             bool hit = humanBoard.Hit(testCor);
             ShipType sunkShip = humanBoard.SunkShip();
             Console.WriteLine($"Computer targets {testCor}, {(hit ? "and hits" : "but misses")}");
@@ -62,11 +81,16 @@ namespace BattleShip
                 Console.WriteLine($"sunk the {sunkShip}");
         }
 
+        private bool Done()
+        {
+            return computerBoard.Done() || humanBoard.Done();
+        }
+
         private void PrintBoards()
         {
             Console.WriteLine("───────────── Your Board ───────────────       ─────────── Guessing Board ─────────────");
             string[] human = humanBoard.ToString().Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
-            string[] computer = computerBoard.PrintHits().Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
+            string[] computer = computerBoard.ToString().Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
 
             for (int i = 0; i < human.Length; i++)
                 Console.WriteLine(human[i] + "  | |  " + computer[i]);
